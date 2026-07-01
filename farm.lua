@@ -286,7 +286,7 @@ KitenFarm.UICorner_4.CornerRadius = UDim.new(0, 8)
 -- OpenHideUI
 
 local MainFrame = KitenFarm.MainFrame
-local Button = script.Parent.KitenFarm.TextButton
+local Button = KitenFarm.TextButton
 
 Button.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
@@ -299,7 +299,7 @@ local VirtualUser = game:GetService('VirtualUser')
 local Players = game:GetService('Players')
 
 local player = Players.LocalPlayer
-local antiIdleButton = script.Parent.KitenFarm:FindFirstChild('MainFrame') and KitenFarm.MainFrame:FindFirstChild('AntiIdle')
+local antiIdleButton = KitenFarm.AntiIdle
 
 local function isEnabled()
 	return antiIdleButton and antiIdleButton:GetAttribute('Enabled') == true
@@ -356,7 +356,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
-local farmButton = Player:WaitForChild("PlayerGui"):WaitForChild("KitenFarm"):WaitForChild("MainFrame"):WaitForChild("Farm")
+local farmButton = KitenFarm.Farm
 
 local function isEnabled()
 	return farmButton:GetAttribute("Enabled") == true
@@ -431,7 +431,4 @@ while true do
 	end
 	task.wait(0.5)
 end
-
 end)
-
-end
