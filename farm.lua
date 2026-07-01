@@ -423,6 +423,7 @@ task.spawn(function()
 		while isEnabled() do
 			if hum.Health<=0 or character.Parent==nil then
 				character=Player.CharacterAdded:Wait()
+				character:WaitForChild("HumanoidRootPart")
 				hum=character:WaitForChild("Humanoid")
 			end
 			runRoute(character)
