@@ -407,7 +407,7 @@ local function runRoute(character)
 		if humanoid.Health <= 0 then return end
 		for _, point in ipairs(positions) do
 			if not isEnabled() or humanoid.Health <= 0 then return end
-			local root = character:FindFirstChild("Head")
+			local root = character:FindFirstChild("HumanoidRootPart")
 			if not root then return end
 			root.CFrame = CFrame.new(point)
 			circleAround(root, point)
@@ -417,14 +417,16 @@ end
 
 task.spawn(function()
 	while true do
-		if not isEnabled() then
-			task.wait(0.2)
-		else
-			local character = Player.Character or Player.CharacterAdded:Wait()
-			runRoute(character)
-			if isEnabled() then
-				Player.CharacterAdded:Wait()
+		if not isEnabled() then task.wait(0.2) continue end
+		local character=Player.Character or Player.CharacterAdded:Wait()
+		local hum=character:WaitForChild("Humanoid")
+		while isEnabled() do
+			if hum.Health<=0 or character.Parent==nil then
+				character=Player.CharacterAdded:Wait()
+				hum=character:WaitForChild("Humanoid")
 			end
+			runRoute(character)
+			task.wait()
 		end
 	end
 end)
