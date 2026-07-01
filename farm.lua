@@ -39,10 +39,9 @@ KitenFarm.Indicator_2.Parent = KitenFarm.AntiIdle
 KitenFarm.Desc.Parent = KitenFarm.AntiIdle
 KitenFarm.TextButton.Parent = KitenFarm.KitenFarm
 KitenFarm.UICorner_4.Parent = KitenFarm.TextButton
-KitenFarm.ResetOnSpawn = false
 
 KitenFarm.KitenFarm.Name = "KitenFarm"
-KitenFarm.KitenFarm.ResetOnSpawn = true
+KitenFarm.KitenFarm.ResetOnSpawn = false
 KitenFarm.KitenFarm.IgnoreGuiInset = false
 KitenFarm.KitenFarm.DisplayOrder = 0
 
