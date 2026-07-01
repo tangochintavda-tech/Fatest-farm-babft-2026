@@ -286,7 +286,7 @@ KitenFarm.UICorner_4.CornerRadius = UDim.new(0, 8)
 -- OpenHideUI
 
 local MainFrame = KitenFarm.MainFrame
-local Button = KitenFarm.TextButton
+local Button = script.Parent.KitenFarm.TextButton
 
 Button.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
@@ -314,7 +314,7 @@ end)
 
 -- Toggle AntiIdle Script
 
-local button = KitenFarm.MainFrame.AntiIdle
+local button = KitenFarm.AntiIdle
 local indicator = button:FindFirstChild("Indicator")
 
 -- :   
@@ -333,7 +333,7 @@ end)
 
 -- Toggle Farm Script
 
-local button = KitenFarm.MainFrame.Farm
+local button = KitenFarm.Farm
 local indicator = button:FindFirstChild("Indicator")
 
 -- :   
@@ -417,6 +417,7 @@ local function runRoute(character)
 end
 
 --  :      
+task.spawn(function()
 while true do
 	if isEnabled() then
 		local character = Player.Character
@@ -429,4 +430,8 @@ while true do
 		end
 	end
 	task.wait(0.5)
+end
+
+end)
+
 end
