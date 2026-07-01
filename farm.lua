@@ -39,6 +39,7 @@ KitenFarm.Indicator_2.Parent = KitenFarm.AntiIdle
 KitenFarm.Desc.Parent = KitenFarm.AntiIdle
 KitenFarm.TextButton.Parent = KitenFarm.KitenFarm
 KitenFarm.UICorner_4.Parent = KitenFarm.TextButton
+KitenFarm.ResetOnSpawn = false
 
 KitenFarm.KitenFarm.Name = "KitenFarm"
 KitenFarm.KitenFarm.ResetOnSpawn = true
@@ -290,7 +291,7 @@ local Button = KitenFarm.TextButton
 
 Button.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
-	Button.Text = MainFrame.Visible and "?" or "+"
+	Button.Text = MainFrame.Visible and "-" or "+"
 end)
 
 -- AntiAfk
