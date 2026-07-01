@@ -285,12 +285,12 @@ KitenFarm.UICorner_4.CornerRadius = UDim.new(0, 8)
 
 -- OpenHideUI
 
-local MainFrame = script.Parent.KitenFarm.MainFrame
-local Button = script.Parent.KitenFarm.TextButton
+local MainFrame = KitenFarm.MainFrame
+local Button = KitenFarm.TextButton
 
 Button.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
-	Button.Text = MainFrame.Visible and "−" or "+"
+	Button.Text = MainFrame.Visible and "?" or "+"
 end)
 
 -- AntiAfk
@@ -299,7 +299,7 @@ local VirtualUser = game:GetService('VirtualUser')
 local Players = game:GetService('Players')
 
 local player = Players.LocalPlayer
-local antiIdleButton = script.Parent.KitenFarm:FindFirstChild('MainFrame') and script.Parent.KitenFarm.MainFrame:FindFirstChild('AntiIdle')
+local antiIdleButton = script.Parent.KitenFarm:FindFirstChild('MainFrame') and KitenFarm.MainFrame:FindFirstChild('AntiIdle')
 
 local function isEnabled()
 	return antiIdleButton and antiIdleButton:GetAttribute('Enabled') == true
@@ -314,10 +314,10 @@ end)
 
 -- Toggle AntiIdle Script
 
-local button = script.Parent.KitenFarm.MainFrame.AntiIdle
+local button = KitenFarm.MainFrame.AntiIdle
 local indicator = button:FindFirstChild("Indicator")
 
--- Инициализация: выключен по умолчанию
+-- :   
 button:SetAttribute("Enabled", false)
 if indicator then
 	indicator.ImageColor3 = Color3.fromRGB(255, 0, 0)
@@ -333,10 +333,10 @@ end)
 
 -- Toggle Farm Script
 
-local button = script.Parent.KitenFarm.MainFrame.Farm
+local button = KitenFarm.MainFrame.Farm
 local indicator = button:FindFirstChild("Indicator")
 
--- Инициализация: выключен по умолчанию
+-- :   
 button:SetAttribute("Enabled", false)
 if indicator then
 	indicator.ImageColor3 = Color3.fromRGB(255, 0, 0)
@@ -416,7 +416,7 @@ local function runRoute(character)
 	humanoid.Died:Wait()
 end
 
--- Главный цикл: запускает маршрут только когда переключатель включён
+--  :      
 while true do
 	if isEnabled() then
 		local character = Player.Character
