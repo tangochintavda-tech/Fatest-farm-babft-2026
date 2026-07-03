@@ -1,3 +1,30 @@
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local player = Players.LocalPlayer
+local gravityNormal = workspace.Gravity
+
+local autoFarmEnabled = false
+local antiAfkEnabled = false
+
+local speedDelay = 1.5
+
+local destinations = {
+	CFrame.new(-51.566, 65, 1369.09),
+	CFrame.new(-51.566, 65, 2139.09),
+	CFrame.new(-51.566, 65, 2909.09),
+	CFrame.new(-51.566, 65, 3679.09),
+	CFrame.new(-51.566, 65, 4449.09),
+	CFrame.new(-51.566, 65, 5219.09),
+	CFrame.new(-51.566, 65, 5989.09),
+	CFrame.new(-51.566, 65, 6759.09),
+	CFrame.new(-51.566, 65, 7529.09),
+	CFrame.new(-51.566, 65, 8299.09),
+	CFrame.new(-55.907, -360.99, 9489.307),
+}
+
+-- GUI (KitenFarm style)
 local KitenFarm = {
 	KitenFarm = Instance.new("ScreenGui"),
 	MainFrame = Instance.new("Frame"),
@@ -281,154 +308,121 @@ KitenFarm.TextButton.ClipsDescendants = false
 KitenFarm.UICorner_4.Name = "UICorner"
 KitenFarm.UICorner_4.CornerRadius = UDim.new(0, 8)
 
--- Scripts --
-
--- OpenHideUI
-
+-- Minimize/Expand
 local MainFrame = KitenFarm.MainFrame
-local Button = KitenFarm.TextButton
+local minButton = KitenFarm.TextButton
 
-Button.MouseButton1Click:Connect(function()
+minButton.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
-	Button.Text = MainFrame.Visible and "-" or "+"
+	minButton.Text = MainFrame.Visible and "-" or "+"
 end)
 
--- AntiAfk
-
-local VirtualUser = game:GetService('VirtualUser')
-local Players = game:GetService('Players')
-
-local player = Players.LocalPlayer
-local antiIdleButton = KitenFarm.AntiIdle
-
-local function isEnabled()
-	return antiIdleButton and antiIdleButton:GetAttribute('Enabled') == true
-end
-
-player.Idled:Connect(function()
-	if isEnabled() then
-		VirtualUser:CaptureController()
-		VirtualUser:ClickButton2(Vector2.new())
-	end
-end)
-
--- Toggle AntiIdle Script
-
-local button = KitenFarm.AntiIdle
-local indicator = button:FindFirstChild("Indicator")
-
--- :   
-button:SetAttribute("Enabled", false)
-if indicator then
-	indicator.ImageColor3 = Color3.fromRGB(255, 0, 0)
-end
-
-button.MouseButton1Click:Connect(function()
-	local isOn = not button:GetAttribute("Enabled")
-	button:SetAttribute("Enabled", isOn)
-	if indicator then
-		indicator.ImageColor3 = isOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-	end
-end)
-
--- Toggle Farm Script
-
-local button = KitenFarm.Farm
-local indicator = button:FindFirstChild("Indicator")
-
--- :   
-button:SetAttribute("Enabled", false)
-if indicator then
-	indicator.ImageColor3 = Color3.fromRGB(255, 0, 0)
-end
-
-button.MouseButton1Click:Connect(function()
-	local isOn = not button:GetAttribute("Enabled")
-	button:SetAttribute("Enabled", isOn)
-	if indicator then
-		indicator.ImageColor3 = isOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-	end
-end)
-
--- Main Farm Script
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local Player = Players.LocalPlayer
+-- Local references for buttons
 local farmButton = KitenFarm.Farm
+local farmIndicator = KitenFarm.Indicator
+local afkButton = KitenFarm.AntiIdle
+local afkIndicator = KitenFarm.Indicator_2
+local screenGui = KitenFarm.KitenFarm
 
-local function isEnabled()
-	return farmButton:GetAttribute("Enabled") == true
-end
+-- TELEPORT FUNCTION (NO TWEEN)
+local TweenService = game:GetService("TweenService")
 
-local positions = {
-	Vector3.new(-51.566, 65, 1369.09),
-	Vector3.new(-51.566, 65, 2139.09),
-	Vector3.new(-51.566, 65, 2909.09),
-	Vector3.new(-51.566, 65, 3679.09),
-	Vector3.new(-51.566, 65, 4449.09),
-	Vector3.new(-51.566, 65, 5219.09),
-	Vector3.new(-51.566, 65, 5989.09),
-	Vector3.new(-51.566, 65, 6759.09),
-	Vector3.new(-51.566, 65, 7529.09),
-	Vector3.new(-51.566, 65, 8299.09),
-	Vector3.new(-55.907, -360.99, 9489.307)
-}
+local function tp(cf)
+	local char = player.Character
+	if not char then return end
 
-local function circleAround(root, center)
-	local radius = 8
-	local duration = 1
-	local start = tick()
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return end
 
-	while tick() - start < duration do
-		if not root.Parent or not isEnabled() then
-			return
-		end
+	workspace.Gravity = 0
 
-		local t = (tick() - start) / duration
-		local angle = t * math.pi * 2
+	-- Сначала телепортируемся в точку
+	root.CFrame = cf
+
+	local center = cf.Position
+	local radius = 6          -- радиус круга
+	local height = 0          -- высота облёта
+	local steps = 24          -- плавность
+	local circleTime = 1      -- время полного круга (сек)
+
+	for i = 1, steps do
+		if not autoFarmEnabled then return end
+
+		local angle = (i / steps) * math.pi * 2
 
 		local pos = center + Vector3.new(
 			math.cos(angle) * radius,
-			0,
+			height,
 			math.sin(angle) * radius
 		)
 
-		root.CFrame = CFrame.new(pos, center)
-		RunService.Heartbeat:Wait()
+		-- Смотреть в центр
+		root.CFrame = CFrame.lookAt(pos, center)
+
+		task.wait(circleTime / steps)
 	end
 end
 
-local function runRoute(character)
-	local humanoid = character:WaitForChild("Humanoid")
+-- AUTO FARM LOOP
+local function autoFarmLoop()
+	while autoFarmEnabled do
+		local char = player.Character or player.CharacterAdded:Wait()
+		local root = char:WaitForChild("HumanoidRootPart", 5)
+		if not root then return end
 
-	while isEnabled() do
-		if humanoid.Health <= 0 then return end
-		for _, point in ipairs(positions) do
-			if not isEnabled() or humanoid.Health <= 0 then return end
-			local root = character:FindFirstChild("HumanoidRootPart")
-			if not root then return end
-			root.CFrame = CFrame.new(point)
-			circleAround(root, point)
+		for i, cf in ipairs(destinations) do
+			if not autoFarmEnabled then return end
+			tp(cf)
+
+			if i == #destinations then
+				workspace.Gravity = gravityNormal
+			end
 		end
+
+		task.wait(1)
 	end
 end
 
+-- AUTO FARM BUTTON
+farmButton.MouseButton1Click:Connect(function()
+	autoFarmEnabled = not autoFarmEnabled
+
+	if autoFarmEnabled then
+		farmIndicator.ImageColor3 = Color3.fromRGB(0, 255, 0)
+		task.spawn(autoFarmLoop)
+	else
+		farmIndicator.ImageColor3 = Color3.fromRGB(255, 0, 0)
+		workspace.Gravity = gravityNormal
+	end
+end)
+
+-- ANTI AFK BUTTON
+afkButton.MouseButton1Click:Connect(function()
+	antiAfkEnabled = not antiAfkEnabled
+
+	if antiAfkEnabled then
+		afkIndicator.ImageColor3 = Color3.fromRGB(0, 255, 0)
+	else
+		afkIndicator.ImageColor3 = Color3.fromRGB(255, 0, 0)
+	end
+end)
+
+-- ANTI AFK LOOP
 task.spawn(function()
 	while true do
-		if not isEnabled() then task.wait(0.2) continue end
-		local character=Player.Character or Player.CharacterAdded:Wait()
-		local hum=character:WaitForChild("Humanoid")
-		while isEnabled() do
-			if hum.Health<=0 or character.Parent==nil then
-				character=Player.CharacterAdded:Wait()
-				character:WaitForChild("HumanoidRootPart")
-				hum=character:WaitForChild("Humanoid")
-			end
-			runRoute(character)
-			task.wait()
+		task.wait(10)
+		if antiAfkEnabled then
+			VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.K, false, game)
+			VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.K, false, game)
 		end
+	end
+end)
+
+-- RESPAWN FIX
+player.CharacterAdded:Connect(function()
+	task.wait(1)
+	if autoFarmEnabled then
+		task.spawn(autoFarmLoop)
 	end
 end)
 
